@@ -4,15 +4,37 @@
 #define LED_PIN_GREEN 5
 #define LED_PIN_BLUE  6
 
-
-long int ref_time = 0;
-long int period = 10;
-
-long int ref_time_2 = 0;
-long int period_2 = 300;
-int x = 0;
-
 int red = 255, green = 255, blue = 255;
+
+
+char command_buffer[30];
+int command_len = 0;
+
+void setLed(int r, int g, int b);
+void getRGBfromText(char text[]);
+void task_blink(long period);
+void task_terminal(long period);
+
+void setup() 
+{
+    Serial.begin(115200);
+
+    pinMode(LED_PIN_RED, OUTPUT);
+    pinMode(LED_PIN_GREEN, OUTPUT);
+    pinMode(LED_PIN_BLUE, OUTPUT);
+
+    setLed(red, green, blue);
+}
+
+
+void loop() 
+{
+    task_terminal(20);
+    task_blink(500);
+
+}
+
+
 
 void setLed(int r, int g, int b)
 {
@@ -21,8 +43,6 @@ void setLed(int r, int g, int b)
     analogWrite(LED_PIN_BLUE, b);
 }
 
-char command_buffer[30];
-int command_len = 0;
 
 
 void getRGBfromText(char text[])
@@ -71,26 +91,35 @@ void getRGBfromText(char text[])
 }
 
 
-void setup() 
+
+void task_blink(long period)
 {
-    Serial.begin(115200);
+    static long ref_time = millis();
+    static int x = 0;
 
-    ref_time = millis();
-    ref_time_2 = millis();
+    if (millis() - ref_time >= period) {
 
-    pinMode(LED_PIN_RED, OUTPUT);
-    pinMode(LED_PIN_GREEN, OUTPUT);
-    pinMode(LED_PIN_BLUE, OUTPUT);
+       if (x == 0) {
+            setLed(red, green, blue);
+            x = 1;
+        }
+        else {
+            setLed(0, 0, 0);
+            x = 0;
+        }
 
-    setLed(red, green, blue);
+       ref_time += period;
+    }
 }
 
 
-void loop() 
+void task_terminal(long period)
 {
+    static long ref_time = millis();
+
     if (millis() - ref_time >= period) {
-        
-        if (Serial.available() > 0) {
+
+      if (Serial.available() > 0) {
             char c = Serial.read();
 
             if (c == '\r' || c == '\n') {
@@ -115,28 +144,6 @@ void loop()
             }
         }
 
-
-
-
-        ref_time += period;
+       ref_time += period;
     }
-
-
-
-
-
-    if (millis() - ref_time_2 >= period_2) {
-        
-        if (x == 0) {
-            setLed(red, green, blue);
-            x = 1;
-        }
-        else {
-            setLed(0, 0, 0);
-            x = 0;
-        }
-       
-        ref_time_2 += period_2;
-    }
-
 }
