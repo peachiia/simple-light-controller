@@ -24,6 +24,53 @@ void setLed(int r, int g, int b)
 char command_buffer[30];
 int command_len = 0;
 
+
+void getRGBfromText(char text[])
+{
+    int i = 0, len = 0;
+
+    while (text[len] != '\0') {
+        len++;
+    }
+
+    red = 0;
+    for (i = 0; i < command_len; i++) {
+        if (text[i] != ' ') {
+            red = (red * 10) + (text[i] - '0');
+        }
+        else {
+            break;
+        }
+    }
+    i++;
+
+    green = 0;
+    for (   ; i < command_len; i++) {
+        if (text[i] != ' ') {
+            green = (green * 10) + (text[i] - '0');
+        }
+        else {
+            break;
+        }
+    }
+    i++;
+
+    blue = 0;
+    for (   ; i < command_len; i++) {
+        if (text[i] != '\0') {
+            blue = (blue * 10) + (text[i] - '0');
+        }
+        else {
+            break;
+        }
+    }
+
+    red = constrain(red, 0, 255);
+    green = constrain(green, 0, 255);
+    blue = constrain(blue, 0, 255);
+}
+
+
 void setup() 
 {
     Serial.begin(115200);
@@ -37,7 +84,6 @@ void setup()
 
     setLed(red, green, blue);
 }
-
 
 
 void loop() 
@@ -55,43 +101,7 @@ void loop()
                     Serial.print("command = ");
                     Serial.println(command_buffer);
 
-                    int i = 0;
-
-                    red = 0;
-                    for (i = 0; i < command_len; i++) {
-                        if (command_buffer[i] != ' ') {
-                            red = (red * 10) + (command_buffer[i] - '0');
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                    i++;
-
-                    green = 0;
-                    for (   ; i < command_len; i++) {
-                        if (command_buffer[i] != ' ') {
-                            green = (green * 10) + (command_buffer[i] - '0');
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                    i++;
-
-                    blue = 0;
-                    for (   ; i < command_len; i++) {
-                        if (command_buffer[i] != '\0') {
-                            blue = (blue * 10) + (command_buffer[i] - '0');
-                        }
-                        else {
-                            break;
-                        }
-                    }
-
-                    red = constrain(red, 0, 255);
-                    green = constrain(green, 0, 255);
-                    blue = constrain(blue, 0, 255);
+                    getRGBfromText(command_buffer);
                     
                     command_len = 0;
                 } 
